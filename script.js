@@ -1,4 +1,4 @@
-let DEV_MODE = localStorage.getItem('DEV_MODE') === 'true';
+
 const firebaseConfig = {
       apiKey: "AIzaSyD40csyp5CtEHzwzv6QXCsjwKZXCf7guls",
       authDomain: "jarvis-website-sign-in-feature.firebaseapp.com",
@@ -410,12 +410,6 @@ const firebaseConfig = {
     }
 
     // --- AUTH ---
-    window.toggleDevMode = function() {
-        const current = localStorage.getItem('DEV_MODE') === 'true';
-        localStorage.setItem('DEV_MODE', !current);
-        location.reload();
-    };
-    
     function handleForgotPassword() {
         const e = document.getElementById('auth-email').value;
         if (!e) return showToast("Enter your email first", "warning");
@@ -575,28 +569,8 @@ const firebaseConfig = {
                 document.getElementById('app-container').classList.add('auth-visible');
             });
         } else { 
-            if (typeof DEV_MODE !== 'undefined' && DEV_MODE) {
-                console.log("DEV_MODE active: Auto-logging in as test user...");
-                l.style.display = 'none'; a.style.display = 'none';
-                document.getElementById('app-container').classList.remove('auth-visible');
-                auth.signInWithEmailAndPassword('dev@musubi.test', 'devpassword').catch(e => {
-                    if (e.code === 'auth/user-not-found') {
-                        auth.createUserWithEmailAndPassword('dev@musubi.test', 'devpassword').then(cred => {
-                            db.collection('users').doc(cred.user.uid).set({
-                                name: 'Dev Taki',
-                                role: 'taki',
-                                coupleId: 'DEV666',
-                                pairTimestamp: Date.now() - 86400000
-                            });
-                        });
-                    } else {
-                        console.error("DEV_MODE login error:", e);
-                    }
-                });
-            } else {
-                l.style.display = 'none'; a.style.display = 'flex'; a.style.opacity = '1';
-                document.getElementById('app-container').classList.add('auth-visible');
-            }
+            l.style.display = 'none'; a.style.display = 'flex'; a.style.opacity = '1';
+            document.getElementById('app-container').classList.add('auth-visible');
         }
     });
 
@@ -992,7 +966,7 @@ const firebaseConfig = {
         localStorage.removeItem('diary-draft-title');
         localStorage.removeItem('diary-draft-content');
         likedSongs = []; recentlyPlayed = []; musicInitialized = false;
-        localStorage.removeItem('DEV_MODE'); // Auto-disable dev mode
+
         auth.signOut().then(() => location.reload()); 
     }
 
@@ -1234,7 +1208,7 @@ const firebaseConfig = {
             // Delete Firebase Auth account
             return user.delete();
         }).then(() => {
-            localStorage.removeItem('DEV_MODE');
+
             showToast("Account deleted forever", "success");
             setTimeout(() => location.reload(), 1500);
         }).catch(err => {

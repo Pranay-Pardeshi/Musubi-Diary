@@ -278,17 +278,16 @@
 
             /* --- Desktop Mini Player (Floating Island Redesign) --- */
             .mini-player { 
-                position: fixed !important; 
-                bottom: 30px !important; 
-                right: 30px !important; 
-                left: auto !important; 
-                width: 360px !important; 
-                max-width: 100% !important;
-                border-radius: 16px !important;
-                border: 1px solid var(--border-color) !important;
-                box-shadow: 0 12px 40px rgba(0,0,0,0.15) !important;
-                z-index: 9998 !important;
-                padding: 12px 20px !important;
+                position: fixed; 
+                bottom: 30px; 
+                right: 30px; 
+                width: 360px; 
+                max-width: 100%;
+                border-radius: 16px;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+                z-index: 9998;
+                padding: 12px 20px;
             }
 
             /* --- Desktop Now Listening Bar --- */
@@ -1091,7 +1090,7 @@
 
         /* Floating Box Mode (iOS dynamic feel) */
         .mini-player.floating-mode {
-            position: absolute !important; bottom: 80px !important; right: 20px !important; left: auto !important;
+            position: fixed !important; bottom: 80px; right: 20px;
             width: 60px !important; height: 60px !important; border-radius: 30px !important; padding: 0 !important;
             display: flex !important; justify-content: center !important; align-items: center !important;
             box-shadow: 0 12px 35px rgba(0,0,0,0.3) !important; border: none !important;
