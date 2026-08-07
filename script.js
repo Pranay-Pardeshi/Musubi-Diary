@@ -1084,12 +1084,6 @@ const firebaseConfig = {
             if (!isDraggingMP) return;
             isDraggingMP = false;
             mp.style.transition = 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)';
-            if (!hasDraggedMP) return; 
-            
-            const rect = mp.getBoundingClientRect();
-            const cx = rect.left + 30;
-            const newLeft = (cx < window.innerWidth / 2) ? 20 : (window.innerWidth - 80);
-            mp.style.left = newLeft + 'px';
         }
         
         mp.addEventListener('touchstart', onStart, { passive: false });
@@ -4075,7 +4069,9 @@ const firebaseConfig = {
                 editEntry(openEntryId, e.title, e.content, e.mood);
             });
         };
-        sheetHeader.insertBefore(editBtn, sheetHeader.firstChild.nextSibling);
+        const firstSpan = sheetHeader.querySelector('span');
+        if (firstSpan) sheetHeader.replaceChild(editBtn, firstSpan);
+        else sheetHeader.insertBefore(editBtn, sheetHeader.firstChild);
     }
 
     // ===== VERSION INFO =====
