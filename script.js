@@ -992,6 +992,7 @@ const firebaseConfig = {
         localStorage.removeItem('diary-draft-title');
         localStorage.removeItem('diary-draft-content');
         likedSongs = []; recentlyPlayed = []; musicInitialized = false;
+        localStorage.removeItem('DEV_MODE'); // Auto-disable dev mode
         auth.signOut().then(() => location.reload()); 
     }
 
@@ -1239,8 +1240,9 @@ const firebaseConfig = {
             // Delete Firebase Auth account
             return user.delete();
         }).then(() => {
-            showPopup("Account Deleted", "Your account and data have been removed.");
-            setTimeout(() => location.reload(), 2000);
+            localStorage.removeItem('DEV_MODE');
+            showToast("Account deleted forever", "success");
+            setTimeout(() => location.reload(), 1500);
         }).catch(err => {
             if (err.code === 'auth/requires-recent-login') {
                 showToast("Please log out, log back in, then try deleting again", "warning");
