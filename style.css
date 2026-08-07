@@ -278,16 +278,16 @@
 
             /* --- Desktop Mini Player (Floating Island Redesign) --- */
             .mini-player { 
-                position: fixed; 
+                position: fixed !important; 
                 bottom: 30px; 
                 right: 30px; 
-                width: 360px; 
-                max-width: 100%;
-                border-radius: 16px;
-                border: 1px solid var(--border-color);
-                box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-                z-index: 9998;
-                padding: 12px 20px;
+                width: 360px !important; 
+                max-width: 100% !important;
+                border-radius: 16px !important;
+                border: 1px solid var(--border-color) !important;
+                box-shadow: 0 12px 40px rgba(0,0,0,0.15) !important;
+                z-index: 9998 !important;
+                padding: 12px 20px !important;
             }
 
             /* --- Desktop Now Listening Bar --- */
