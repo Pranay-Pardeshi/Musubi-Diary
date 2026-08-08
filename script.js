@@ -1339,32 +1339,11 @@ const firebaseConfig = {
         });
     }
 
-    let _bgAudioEl = null;
-    function setupBackgroundAudio() {
-        if (_bgAudioEl) return;
-        _bgAudioEl = document.createElement('audio');
-        // Very short, silent wav base64
-        _bgAudioEl.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-        _bgAudioEl.loop = true;
-        _bgAudioEl.volume = 0.01;
-    }
-
-    function setupMediaSession() {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.setActionHandler('play', togglePlayPause);
-            navigator.mediaSession.setActionHandler('pause', togglePlayPause);
-            navigator.mediaSession.setActionHandler('previoustrack', playPrev);
-            navigator.mediaSession.setActionHandler('nexttrack', playNext);
-        }
-    }
-
     function createYTPlayer() {
         if (ytReady || ytPlayer) return; // Already created
         ytInitAttempts++;
         if (ytInitAttempts > 5) { console.error('YT Player init failed after 5 attempts'); return; }
         try {
-            setupBackgroundAudio();
-            setupMediaSession();
             if (typeof YT === 'undefined' || !YT.Player) {
                 console.warn('YT not ready, retrying in 1s...');
                 setTimeout(createYTPlayer, 1000);
@@ -1457,7 +1436,6 @@ const firebaseConfig = {
     };
         if (event.data === YT.PlayerState.PLAYING) {
             isMusicPlaying = true; updatePlayerUI(); startProgress();
-            if (_bgAudioEl) _bgAudioEl.play().catch(e => console.warn("Bg audio play blocked", e));
             // If spectating and partner has paused, re-pause to stay in sync
             // But skip this check during initial video load to avoid race condition
             if (isSpectating && !_spectatorLoadingVideo && partnerNowPlayingData && !partnerNowPlayingData.isPlaying) {
@@ -1467,18 +1445,7 @@ const firebaseConfig = {
         if (event.data === YT.PlayerState.PAUSED) {
             // During spectator video load, don't kill progress - YouTube buffers and fires PAUSED briefly
             if (_spectatorLoadingVideo) return;
-            
-            // Background playback keep-alive:
-            // If the browser paused the iframe because the screen turned off (document.hidden),
-            // and the user didn't explicitly pause, force it to resume playing.
-            if (!window._userInitiatedPause && document.hidden) {
-                console.log("Background pause detected. Forcing play.");
-                ytPlayer.playVideo();
-                return;
-            }
-
             isMusicPlaying = false; updatePlayerUI(); stopProgress();
-            if (_bgAudioEl) _bgAudioEl.pause();
             if (!isSpectating) { try { stopBroadcast(); } catch(e) {} }
             // If spectating and partner is still playing, auto-resume
             if (isSpectating && partnerNowPlayingData && partnerNowPlayingData.isPlaying) {
@@ -1544,11 +1511,8 @@ const firebaseConfig = {
         } catch(err) { row.innerHTML = '<p style="color:var(--text-sub);font-size:12px;padding:5px;">Could not load. Try again later.</p>'; }
     }
 
-    window._userInitiatedPause = false;
-    
     // --- Playback ---
     function playSong(song) {
-        window._userInitiatedPause = false;
         // Exit spectator mode when user explicitly plays a song
         if (isSpectating) exitSpectatorMode('You started playing your own music');
         // Show mini player immediately with song info (even before YT is ready)
@@ -1614,13 +1578,7 @@ const firebaseConfig = {
     function togglePlayPause() {
         if (isSpectating) { showToast('Controls locked in spectator mode', 'warning', 1500); return; }
         if (!ytPlayer || !currentSong) return;
-        if (isMusicPlaying) {
-            window._userInitiatedPause = true;
-            ytPlayer.pauseVideo();
-        } else {
-            window._userInitiatedPause = false;
-            ytPlayer.playVideo();
-        }
+        if (isMusicPlaying) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
     }
 
     function playNext() {
@@ -1746,22 +1704,6 @@ const firebaseConfig = {
         document.getElementById('mini-title').innerText = currentSong.title;
         document.getElementById('mini-artist').innerText = currentSong.channelTitle;
         document.getElementById('mini-play-icon').className = isMusicPlaying ? 'fas fa-pause' : 'fas fa-play';
-
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: currentSong.title,
-                artist: currentSong.channelTitle,
-                artwork: [
-                    { src: thumb, sizes: '96x96', type: 'image/jpeg' },
-                    { src: thumb, sizes: '128x128', type: 'image/jpeg' },
-                    { src: thumb, sizes: '192x192', type: 'image/jpeg' },
-                    { src: thumb, sizes: '256x256', type: 'image/jpeg' },
-                    { src: thumb, sizes: '384x384', type: 'image/jpeg' },
-                    { src: thumb, sizes: '512x512', type: 'image/jpeg' }
-                ]
-            });
-            navigator.mediaSession.playbackState = isMusicPlaying ? 'playing' : 'paused';
-        }
 
         const artImg = document.getElementById('fp-artwork-img');
         artImg.src = thumb;
