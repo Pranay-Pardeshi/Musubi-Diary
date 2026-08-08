@@ -3142,11 +3142,21 @@ const firebaseConfig = {
                 };
             }
 
-            // Block clicks outside the tutorial bubble area
+            // Block clicks outside the tutorial bubble or spotlight area
             _tutWtBlockHandler = function(e) {
-                if (!e.target.closest('.tut-wt-avatar-wrap')) {
+                var isBubble = e.target.closest('.tut-wt-avatar-wrap');
+                var isSpotlight = e.target.closest('.tut-wt-spotlight') || e.target.closest('.tut-wt-elevated');
+                
+                if (!isBubble && !isSpotlight) {
+                    // Block clicks on background
                     e.stopPropagation();
                     e.preventDefault();
+                } else if (isSpotlight && !isBubble) {
+                    // If they click the highlighted feature, let the click happen AND auto-advance the tutorial!
+                    setTimeout(function() {
+                        tutWtIndex++;
+                        _renderTutWtStep();
+                    }, 600);
                 }
             };
             document.addEventListener('click', _tutWtBlockHandler, true);
@@ -3154,7 +3164,7 @@ const firebaseConfig = {
 
         // --- DYNAMIC POSITIONING & SPOTLIGHT LOGIC ---
         var wrapEl = document.getElementById('tut-wt-avatar-wrap');
-        wrapEl.classList.remove('tut-wt-pos-left', 'tut-wt-pos-right');
+        wrapEl.classList.remove('tut-wt-pos-left', 'tut-wt-pos-right', 'tut-wt-pos-top', 'tut-wt-pos-bottom');
         wrapEl.style.top = ''; wrapEl.style.bottom = ''; wrapEl.style.left = ''; wrapEl.style.right = '';
 
         var targetEl = step.target ? document.querySelector(step.target) : null;
@@ -3180,15 +3190,17 @@ const firebaseConfig = {
 
             // Vertical positioning: Opposite side of target
             if (rect.top + (rect.height/2) > screenH / 2) {
-                wrapEl.style.top = '40px';
+                wrapEl.classList.add('tut-wt-pos-top');
+                wrapEl.style.top = '60px'; // Give clearance for top nav/headers
                 wrapEl.style.bottom = 'auto';
             } else {
+                wrapEl.classList.add('tut-wt-pos-bottom');
                 wrapEl.style.bottom = (window.innerWidth <= 480 ? '20px' : '60px');
                 wrapEl.style.top = 'auto';
             }
         } else {
             // Default position
-            wrapEl.classList.add('tut-wt-pos-right');
+            wrapEl.classList.add('tut-wt-pos-right', 'tut-wt-pos-bottom');
             wrapEl.style.bottom = (window.innerWidth <= 480 ? '20px' : '60px');
             wrapEl.style.right = (window.innerWidth <= 480 ? '10px' : '20px');
         }
