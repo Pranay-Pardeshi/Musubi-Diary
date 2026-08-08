@@ -2986,21 +2986,21 @@ const firebaseConfig = {
     // ===== INTERACTIVE TUTORIAL WALKTHROUGH ENGINE =====
     const authTutSteps = [
         { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Welcome to Musubi Diary! I'm Mitsuha. Are you ready to connect our timelines? Let's start by logging in!", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/taki/taki-img-2.png', text: "I'm Taki! If you don't have an account yet, just type your email and password, then click Sign Up.", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/mitsuha/mitsuha-img-3.png', text: "After you sign in, you'll get an Invite Code. Share it with your partner to pair your accounts! ✨", action: 'finish', btnLabel: 'Got it!' }
+        { img: 'imgs/taki/taki-img-1.png', text: "I'm Taki! If you don't have an account yet, just type your email and password, then click Sign Up.", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "After you sign in, you'll get an Invite Code. Share it with your partner to pair your accounts! ✨", action: 'finish', btnLabel: 'Got it!' }
     ];
 
     const mainTutSteps = [
-        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "Yay, you're in! Let me show you around our diary.", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/taki/taki-img-1.png', text: "First, let's write a memory. Tap the Pen icon down here to open the composer.", action: 'click', target: '#tab-diary' },
-        { img: 'imgs/mitsuha/mitsuha-img-6.png', text: "Don't forget to tell me how your day was by picking a weather mood! ☀️", action: 'click', target: '.diary-mood-section', listenTarget: '.mood-opt' },
-        { img: 'imgs/taki/taki-img-4.png', text: "You can also attach photos to your memories. Tap the image icon if you want.", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Perfect! Now tap the Music tab so we can share a song together!", action: 'click', target: '#tab-music' },
+        { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Yay, you're in! Let me show you around our diary.", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/taki/taki-img-1.png', text: "First, let's write a memory. This is your diary tab!", action: 'next', btnLabel: 'Next', preAction: () => { if(typeof switchTab==='function') switchTab('entries'); } },
+        { img: 'imgs/mitsuha/mitsuha-img-3.png', text: "Don't forget to tell me how your day was by picking a weather mood! ☀️", action: 'next', btnLabel: 'Next', target: '.diary-mood-section' },
+        { img: 'imgs/taki/taki-img-3.png', text: "You can also attach photos to your memories. Tap the image icon if you want.", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "Perfect! Now let's go to the Music tab so we can share a song together!", action: 'next', btnLabel: 'Next', preAction: () => { if(typeof switchTab==='function') switchTab('music'); } },
         { img: 'imgs/taki/taki-img-5.png', text: "Check out the Trending Now charts. These update constantly!", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/mitsuha/mitsuha-img-2.png', text: "Click on the mini player at the bottom to open the full music player.", action: 'click', target: '#mini-player' },
-        { img: 'imgs/taki/taki-img-6.png', text: "You can toggle between Song and Video mode using the pill at the top! 🎵", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/mitsuha/mitsuha-img-8.png', text: "If we both open the app, we can listen together in Spectator Mode!", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/taki/taki-img-8.png', text: "Tap the Chat tab to send me real-time messages. 💬", action: 'click', target: '#tab-chat' },
+        { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Let's open the full player!", action: 'next', btnLabel: 'Next', preAction: () => { document.getElementById('full-player').classList.add('active'); document.getElementById('mini-player').classList.add('hidden'); } },
+        { img: 'imgs/taki/taki-img-3.png', text: "You can toggle between Song and Video mode using the pill at the top! 🎵", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "If we both open the app, we can listen together in Spectator Mode!", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/taki/taki-img-1.png', text: "Tap the Chat tab to send me real-time messages. 💬", action: 'next', btnLabel: 'Next', preAction: () => { document.getElementById('full-player').classList.remove('active'); document.getElementById('mini-player').classList.remove('hidden'); if(typeof switchTab==='function') switchTab('chat'); } },
         { img: 'imgs/mitsuha/mitsuha-img-11.png', text: "That's it! Remember, we swap bodies every day at midnight. Have fun! ✨ 💕", action: 'finish', btnLabel: 'Finish' }
     ];
 
@@ -3096,6 +3096,11 @@ const firebaseConfig = {
     function _renderTutWtStep() {
         var step = currentTutSteps[tutWtIndex];
         if (!step) return;
+
+        // Auto-navigate UI if needed so user doesn't get stuck
+        if (typeof step.preAction === 'function') {
+            step.preAction();
+        }
 
         var avatarImg = document.getElementById('tut-wt-avatar');
         var textEl = document.getElementById('tut-wt-text');
