@@ -1467,6 +1467,16 @@ const firebaseConfig = {
         if (event.data === YT.PlayerState.PAUSED) {
             // During spectator video load, don't kill progress - YouTube buffers and fires PAUSED briefly
             if (_spectatorLoadingVideo) return;
+            
+            // Background playback keep-alive:
+            // If the browser paused the iframe because the screen turned off (document.hidden),
+            // and the user didn't explicitly pause, force it to resume playing.
+            if (!window._userInitiatedPause && document.hidden) {
+                console.log("Background pause detected. Forcing play.");
+                ytPlayer.playVideo();
+                return;
+            }
+
             isMusicPlaying = false; updatePlayerUI(); stopProgress();
             if (_bgAudioEl) _bgAudioEl.pause();
             if (!isSpectating) { try { stopBroadcast(); } catch(e) {} }
@@ -1534,8 +1544,11 @@ const firebaseConfig = {
         } catch(err) { row.innerHTML = '<p style="color:var(--text-sub);font-size:12px;padding:5px;">Could not load. Try again later.</p>'; }
     }
 
+    window._userInitiatedPause = false;
+    
     // --- Playback ---
     function playSong(song) {
+        window._userInitiatedPause = false;
         // Exit spectator mode when user explicitly plays a song
         if (isSpectating) exitSpectatorMode('You started playing your own music');
         // Show mini player immediately with song info (even before YT is ready)
@@ -1601,7 +1614,13 @@ const firebaseConfig = {
     function togglePlayPause() {
         if (isSpectating) { showToast('Controls locked in spectator mode', 'warning', 1500); return; }
         if (!ytPlayer || !currentSong) return;
-        if (isMusicPlaying) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
+        if (isMusicPlaying) {
+            window._userInitiatedPause = true;
+            ytPlayer.pauseVideo();
+        } else {
+            window._userInitiatedPause = false;
+            ytPlayer.playVideo();
+        }
     }
 
     function playNext() {
