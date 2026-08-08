@@ -2992,16 +2992,39 @@ const firebaseConfig = {
 
     const mainTutSteps = [
         { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Yay, you're in! Let me show you around our diary.", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/taki/taki-img-1.png', text: "First, let's write a memory. This is your diary tab!", action: 'next', btnLabel: 'Next', target: '#tab-diary', preAction: () => { if(typeof switchTab==='function') switchTab('entries'); } },
+        
+        // DIARY
+        { img: 'imgs/taki/taki-img-1.png', text: "This is the Diary. Tap the Pen icon down here to write a new memory.", action: 'next', btnLabel: 'Next', target: '#nav-diary', preAction: () => { if(typeof switchTab==='function') switchTab('entries'); } },
         { img: 'imgs/mitsuha/mitsuha-img-3.png', text: "Don't forget to tell me how your day was by picking a weather mood! ☀️", action: 'next', btnLabel: 'Next', target: '.diary-mood-section' },
-        { img: 'imgs/taki/taki-img-3.png', text: "You can also attach photos to your memories. Tap the image icon if you want.", action: 'next', btnLabel: 'Next', target: '.diary-img-btn' },
-        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "Perfect! Now let's go to the Music tab so we can share a song together!", action: 'next', btnLabel: 'Next', target: '#tab-music', preAction: () => { if(typeof switchTab==='function') switchTab('music'); } },
-        { img: 'imgs/taki/taki-img-5.png', text: "Check out the Trending Now charts. These update constantly!", action: 'next', btnLabel: 'Next', target: '.charts-container' },
-        { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Let's open the full player!", action: 'next', btnLabel: 'Next', target: '#mini-player', preAction: () => { document.getElementById('full-player').classList.add('active'); document.getElementById('mini-player').classList.add('hidden'); } },
-        { img: 'imgs/taki/taki-img-3.png', text: "You can toggle between Song and Video mode using the pill at the top! 🎵", action: 'next', btnLabel: 'Next', target: '#player-view-toggle' },
-        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "If we both open the app, we can listen together in Spectator Mode!", action: 'next', btnLabel: 'Next', target: '#btn-spectator' },
-        { img: 'imgs/taki/taki-img-1.png', text: "Tap the Chat tab to send me real-time messages. 💬", action: 'next', btnLabel: 'Next', target: '#tab-chat', preAction: () => { document.getElementById('full-player').classList.remove('active'); document.getElementById('mini-player').classList.remove('hidden'); if(typeof switchTab==='function') switchTab('chat'); } },
-        { img: 'imgs/mitsuha/mitsuha-img-11.png', text: "That's it! Remember, we swap bodies every day at midnight. Have fun! ✨ 💕", action: 'finish', btnLabel: 'Finish' }
+        
+        // CALENDAR
+        { img: 'imgs/taki/taki-img-2.png', text: "Over in the Calendar, you can see all our past memories organized by date.", action: 'next', btnLabel: 'Next', target: '#nav-calendar', preAction: () => { if(typeof switchTab==='function') switchTab('calendar'); } },
+        
+        // GALLERY
+        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "The Gallery keeps all the photos we've ever shared in one place! 📸", action: 'next', btnLabel: 'Next', target: '#nav-gallery', preAction: () => { if(typeof switchTab==='function') switchTab('gallery'); } },
+
+        // MUSIC
+        { img: 'imgs/taki/taki-img-1.png', text: "Now let's go to the Music tab. I'll put on a song for us!", action: 'next', btnLabel: 'Next', target: '#nav-music', preAction: () => { 
+            if(typeof switchTab==='function') switchTab('music'); 
+            setTimeout(() => {
+                var firstTrack = document.querySelector('.trending-track');
+                if (firstTrack) firstTrack.click();
+            }, 500);
+        } },
+        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "Awesome! You can see the Trending Now charts right here.", action: 'next', btnLabel: 'Next', target: '.charts-container' },
+        { img: 'imgs/taki/taki-img-5.png', text: "Click on the mini player at the bottom to open the full music player.", action: 'next', btnLabel: 'Next', target: '#mini-player' },
+        
+        // FULL PLAYER
+        { img: 'imgs/mitsuha/mitsuha-img-3.png', text: "You can toggle between Song and Video mode using the pill at the top! 🎵", action: 'next', btnLabel: 'Next', target: '#player-view-toggle', preAction: () => { document.getElementById('full-player').classList.add('active'); document.getElementById('mini-player').classList.add('hidden'); } },
+        { img: 'imgs/taki/taki-img-8.png', text: "If we both open the app, we can listen together in Spectator Mode!", action: 'next', btnLabel: 'Next', target: '#btn-spectator' },
+        
+        // CHAT
+        { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Tap the Chat tab to send me real-time messages. 💬", action: 'next', btnLabel: 'Next', target: '#nav-chat', preAction: () => { document.getElementById('full-player').classList.remove('active'); document.getElementById('mini-player').classList.remove('hidden'); if(typeof switchTab==='function') switchTab('chat'); } },
+
+        // SETTINGS (Lock)
+        { img: 'imgs/taki/taki-img-1.png', text: "Finally, in Settings, you can enable the App Lock to keep our diary completely private. 🔒", action: 'next', btnLabel: 'Next', target: '#nav-settings', preAction: () => { if(typeof switchTab==='function') switchTab('settings'); } },
+
+        { img: 'imgs/mitsuha/mitsuha-img-11.png', text: "That's it! Remember, we swap bodies every day at midnight. Have fun! ✨ 💕", action: 'finish', btnLabel: 'Finish', preAction: () => { if(typeof switchTab==='function') switchTab('entries'); } }
     ];
 
     let currentTutSteps = [];
@@ -3038,6 +3061,8 @@ const firebaseConfig = {
             _tutWtPrevSpotlight.classList.remove('tut-wt-spotlight');
             _tutWtPrevSpotlight = null;
         }
+        document.querySelectorAll('.tut-wt-spotlight').forEach(el => el.classList.remove('tut-wt-spotlight'));
+        
         // Remove elevated ancestors
         _tutWtElevated.forEach(function(el) {
             el.classList.remove('tut-wt-elevated');
