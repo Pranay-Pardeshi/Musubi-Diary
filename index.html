@@ -507,9 +507,11 @@
             </div>
             <div class="fp-controls">
                 <button class="fp-ctrl" id="fp-shuffle" onclick="toggleShuffle()"><i class="fas fa-shuffle"></i></button>
-                <button class="fp-ctrl" onclick="playPrev()"><i class="fas fa-backward-step"></i></button>
-                <button class="fp-play-btn" onclick="togglePlayPause()"><i class="fas fa-play" id="fp-play-icon"></i></button>
-                <button class="fp-ctrl" onclick="playNext()"><i class="fas fa-forward-step"></i></button>
+                <button class="fp-ctrl" onclick="playPrev()"><svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M18.945 7.06c1.25-.714 2.805.189 2.805 1.628v8.623c0 1.44-1.555 2.342-2.805 1.628L12 14.471v2.34c0 1.44-1.555 2.342-2.805 1.628l-7.108-4.061c-1.26-.72-1.26-2.536 0-3.256l7.108-4.061C10.445 6.346 12 7.25 12 8.688v2.34l6.945-3.969z" /></svg></button>
+                <button class="fp-play-btn" onclick="togglePlayPause()" id="fp-play-wrapper">
+                    <svg id="fp-play-icon-svg" viewBox="0 0 24 24" fill="currentColor" width="32" height="32" style="margin-left: 3px;"><path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd" /></svg>
+                </button>
+                <button class="fp-ctrl" onclick="playNext()"><svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M5.055 7.06c-1.25-.714-2.805.189-2.805 1.628v8.623c0 1.44 1.555 2.342 2.805 1.628L12 14.471v2.34c0 1.44 1.555 2.342 2.805 1.628l7.108-4.061c1.26-.72 1.26-2.536 0-3.256L14.805 7.06C13.555 6.346 12 7.25 12 8.688v2.34L5.055 7.06z" /></svg></button>
                 <button class="fp-ctrl" id="fp-repeat" onclick="toggleRepeat()"><i class="fas fa-repeat"></i></button>
             </div>
             <div class="fp-extra">
@@ -590,9 +592,7 @@
         </div>
     </div>
 
-    <!-- Now Listening Indicator -->
     <div class="now-listening" id="now-listening-bar" onclick="enterSpectatorMode()">
-        <div class="nl-pulse"></div>
         <img id="nl-thumb" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23374151%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 fill=%22%239CA3AF%22 font-size=%2240%22%3E%E2%99%AA%3C/text%3E%3C/svg%3E">
         <div style="flex:1;min-width:0;"><div class="nl-text" id="nl-text">Partner is listening to...</div><div class="nl-spectate-hint"><i class="fas fa-eye" style="margin-right:3px;"></i>Tap to listen together</div></div>
         <i class="fas fa-headphones" style="font-size:13px;opacity:0.7;"></i>

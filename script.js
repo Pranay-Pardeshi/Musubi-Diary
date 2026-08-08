@@ -1682,7 +1682,12 @@ const firebaseConfig = {
 
         document.getElementById('fp-title').innerText = currentSong.title;
         document.getElementById('fp-artist').innerText = currentSong.channelTitle;
-        document.getElementById('fp-play-icon').className = isMusicPlaying ? 'fas fa-pause' : 'fas fa-play';
+        const fpPlayWrapper = document.getElementById('fp-play-wrapper');
+        if (fpPlayWrapper) {
+            fpPlayWrapper.innerHTML = isMusicPlaying 
+                ? '<svg id="fp-play-icon-svg" viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75h-1.5a.75.75 0 01-.75-.75V5.25z" clip-rule="evenodd" /></svg>'
+                : '<svg id="fp-play-icon-svg" viewBox="0 0 24 24" fill="currentColor" width="32" height="32" style="margin-left: 3px;"><path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clip-rule="evenodd" /></svg>';
+        }
         // Update lyrics mini info
         const lyrThumb = document.getElementById('fp-lyrics-thumb'); if(lyrThumb) { lyrThumb.src = thumb; lyrThumb.onerror = function() { this.onerror = null; this.src = _imgFallback; }; }
         const lyrTitle = document.getElementById('fp-lyrics-title'); if(lyrTitle) lyrTitle.innerText = currentSong.title;
