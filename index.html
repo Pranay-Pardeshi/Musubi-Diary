@@ -473,10 +473,21 @@
         <div class="fp-content">
             <div class="fp-header">
                 <button class="fp-header-btn" onclick="closeFullPlayer()"><i class="fas fa-chevron-down"></i></button>
-                <div class="fp-header-title">Now Playing</div>
+                <div class="fp-toggle-container">
+                    <div class="fp-toggle-pill">
+                        <div class="fp-toggle-bg" id="fp-toggle-bg"></div>
+                        <div class="fp-toggle-btn active" id="btn-song" onclick="setPlayerMode('song')">Song</div>
+                        <div class="fp-toggle-btn" id="btn-video" onclick="setPlayerMode('video')">Video</div>
+                    </div>
+                </div>
                 <button class="fp-header-btn" onclick="openQueue()"><i class="fas fa-bars-staggered"></i></button>
             </div>
-            <div class="fp-artwork"><img id="fp-artwork-img" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23374151%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 fill=%22%239CA3AF%22 font-size=%2240%22%3E%E2%99%AA%3C/text%3E%3C/svg%3E" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23374151%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 fill=%22%239CA3AF%22 font-size=%2240%22%3E%E2%99%AA%3C/text%3E%3C/svg%3E'"></div>
+            <div class="fp-artwork">
+                <img id="fp-artwork-img" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23374151%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 fill=%22%239CA3AF%22 font-size=%2240%22%3E%E2%99%AA%3C/text%3E%3C/svg%3E" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23374151%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 fill=%22%239CA3AF%22 font-size=%2240%22%3E%E2%99%AA%3C/text%3E%3C/svg%3E'">
+                <div class="fp-video-layer" id="fp-video-layer">
+                    <div id="yt-player"></div>
+                </div>
+            </div>
             <!-- Lyrics Panel (Spotify-style, replaces artwork when active) -->
             <div class="fp-lyrics-panel" id="fp-lyrics-panel">
                 <div class="fp-lyrics-mini-art">
@@ -695,7 +706,7 @@
 <div id="ios-popup" class="ios-popup"><h3 id="popup-title">Notification</h3><p id="popup-msg"></p><div class="popup-btn" onclick="closePopup()">OK</div></div>
 
 <audio id="bg-music" loop src="background-music.mp3"></audio>
-<div id="yt-player-container" style="position:fixed;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;bottom:0;left:0;"><div id="yt-player"></div></div>
+
 
 <!-- Song Note Modal -->
 <div class="sheet-overlay" id="note-overlay" onclick="closeSongNote()"></div>

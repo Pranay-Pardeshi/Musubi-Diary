@@ -1339,18 +1339,39 @@ const firebaseConfig = {
         });
     }
 
+    let _bgAudioEl = null;
+    function setupBackgroundAudio() {
+        if (_bgAudioEl) return;
+        _bgAudioEl = document.createElement('audio');
+        // Very short, silent wav base64
+        _bgAudioEl.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        _bgAudioEl.loop = true;
+        _bgAudioEl.volume = 0.01;
+    }
+
+    function setupMediaSession() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', togglePlayPause);
+            navigator.mediaSession.setActionHandler('pause', togglePlayPause);
+            navigator.mediaSession.setActionHandler('previoustrack', playPrev);
+            navigator.mediaSession.setActionHandler('nexttrack', playNext);
+        }
+    }
+
     function createYTPlayer() {
         if (ytReady || ytPlayer) return; // Already created
         ytInitAttempts++;
         if (ytInitAttempts > 5) { console.error('YT Player init failed after 5 attempts'); return; }
         try {
+            setupBackgroundAudio();
+            setupMediaSession();
             if (typeof YT === 'undefined' || !YT.Player) {
                 console.warn('YT not ready, retrying in 1s...');
                 setTimeout(createYTPlayer, 1000);
                 return;
             }
             ytPlayer = new YT.Player('yt-player', {
-                height: '1', width: '1',
+                height: '100%', width: '100%',
                 playerVars: { autoplay:0, controls:0, disablekb:1, fs:0, modestbranding:1, playsinline:1, origin: window.location.origin },
                 events: {
                     'onReady': function() { ytReady = true; console.log('YT Player Ready'); },
@@ -1410,8 +1431,33 @@ const firebaseConfig = {
             else if (repeatMode === 1) { musicQueueIndex = 0; playSongFromQueue(); }
             else { isMusicPlaying = false; updatePlayerUI(); stopProgress(); try { stopBroadcast(); } catch(e) {} }
         }
+
+    window.setPlayerMode = function(mode) {
+        const togglePill = document.querySelector('.fp-toggle-pill');
+        const btnSong = document.getElementById('btn-song');
+        const btnVideo = document.getElementById('btn-video');
+        const videoLayer = document.getElementById('fp-video-layer');
+        const artworkImg = document.getElementById('fp-artwork-img');
+        
+        if (!togglePill || !videoLayer || !artworkImg) return;
+        
+        if (mode === 'video') {
+            togglePill.setAttribute('data-mode', 'video');
+            btnSong.classList.remove('active');
+            btnVideo.classList.add('active');
+            videoLayer.classList.add('active');
+            artworkImg.classList.add('hidden-mode');
+        } else {
+            togglePill.setAttribute('data-mode', 'song');
+            btnVideo.classList.remove('active');
+            btnSong.classList.add('active');
+            videoLayer.classList.remove('active');
+            artworkImg.classList.remove('hidden-mode');
+        }
+    };
         if (event.data === YT.PlayerState.PLAYING) {
             isMusicPlaying = true; updatePlayerUI(); startProgress();
+            if (_bgAudioEl) _bgAudioEl.play().catch(e => console.warn("Bg audio play blocked", e));
             // If spectating and partner has paused, re-pause to stay in sync
             // But skip this check during initial video load to avoid race condition
             if (isSpectating && !_spectatorLoadingVideo && partnerNowPlayingData && !partnerNowPlayingData.isPlaying) {
@@ -1419,9 +1465,10 @@ const firebaseConfig = {
             }
         }
         if (event.data === YT.PlayerState.PAUSED) {
-            // During spectator video load, don't kill progress — YouTube buffers and fires PAUSED briefly
+            // During spectator video load, don't kill progress - YouTube buffers and fires PAUSED briefly
             if (_spectatorLoadingVideo) return;
             isMusicPlaying = false; updatePlayerUI(); stopProgress();
+            if (_bgAudioEl) _bgAudioEl.pause();
             if (!isSpectating) { try { stopBroadcast(); } catch(e) {} }
             // If spectating and partner is still playing, auto-resume
             if (isSpectating && partnerNowPlayingData && partnerNowPlayingData.isPlaying) {
@@ -1468,15 +1515,21 @@ const firebaseConfig = {
 
     async function fetchTrending(query) {
         const row = document.getElementById('trending-row');
-        row.innerHTML = Array(5).fill('<div class="skel-card"><div class="skeleton skel-thumb"></div><div class="skeleton skel-line"></div><div class="skeleton skel-line-sm"></div></div>').join('');
+        row.innerHTML = Array(5).fill('<div class="chart-row-skel"><div class="skeleton skel-num"></div><div class="skeleton skel-thumb"></div><div class="skel-info"><div class="skeleton skel-line"></div><div class="skeleton skel-line-sm"></div></div></div>').join('');
         try {
             const songs = await ytSearch(query || 'trending music 2025 hits', 12);
             row.innerHTML = '';
-            songs.forEach(song => {
-                const sj = JSON.stringify(song).replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                row.innerHTML += `<div class="music-card" onclick='playSong(JSON.parse(this.dataset.song))' data-song='${JSON.stringify(song).replace(/'/g, "&#39;")}'>
-                    <img class="music-card-img" src="${song.thumbnail}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23374151%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 fill=%22%239CA3AF%22 font-size=%2240%22%3E%E2%99%AA%3C/text%3E%3C/svg%3E'">
-                    <div class="music-card-title">${song.title}</div><div class="music-card-sub">${song.channelTitle}</div></div>`;
+            row.className = 'chart-list';
+            songs.forEach((song, index) => {
+                row.innerHTML += `<div class="chart-row" onclick='playSong(JSON.parse(this.dataset.song))' data-song='${JSON.stringify(song).replace(/'/g, "&#39;")}' tabindex="0">
+                    <div class="chart-rank">${index + 1}</div>
+                    <img class="chart-img" src="${song.thumbnail}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23374151%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2255%25%22 text-anchor=%22middle%22 fill=%22%239CA3AF%22 font-size=%2240%22%3E%E2%99%AA%3C/text%3E%3C/svg%3E'">
+                    <div class="chart-info">
+                        <div class="chart-title">${song.title}</div>
+                        <div class="chart-artist">${song.channelTitle}</div>
+                    </div>
+                    <div class="chart-play-icon"><i class="fas fa-play"></i></div>
+                </div>`;
             });
         } catch(err) { row.innerHTML = '<p style="color:var(--text-sub);font-size:12px;padding:5px;">Could not load. Try again later.</p>'; }
     }
@@ -1674,6 +1727,22 @@ const firebaseConfig = {
         document.getElementById('mini-title').innerText = currentSong.title;
         document.getElementById('mini-artist').innerText = currentSong.channelTitle;
         document.getElementById('mini-play-icon').className = isMusicPlaying ? 'fas fa-pause' : 'fas fa-play';
+
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: currentSong.title,
+                artist: currentSong.channelTitle,
+                artwork: [
+                    { src: thumb, sizes: '96x96', type: 'image/jpeg' },
+                    { src: thumb, sizes: '128x128', type: 'image/jpeg' },
+                    { src: thumb, sizes: '192x192', type: 'image/jpeg' },
+                    { src: thumb, sizes: '256x256', type: 'image/jpeg' },
+                    { src: thumb, sizes: '384x384', type: 'image/jpeg' },
+                    { src: thumb, sizes: '512x512', type: 'image/jpeg' }
+                ]
+            });
+            navigator.mediaSession.playbackState = isMusicPlaying ? 'playing' : 'paused';
+        }
 
         const artImg = document.getElementById('fp-artwork-img');
         artImg.src = thumb;
