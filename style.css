@@ -288,6 +288,10 @@
                 box-shadow: 0 12px 40px rgba(0,0,0,0.15) !important;
                 z-index: 9998 !important;
                 padding: 12px 20px !important;
+                overflow: hidden !important;
+            }
+            .mini-player-progress {
+                top: 0 !important;
             }
 
             /* --- Desktop Now Listening Bar --- */
