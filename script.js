@@ -2992,15 +2992,15 @@ const firebaseConfig = {
 
     const mainTutSteps = [
         { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Yay, you're in! Let me show you around our diary.", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/taki/taki-img-1.png', text: "First, let's write a memory. This is your diary tab!", action: 'next', btnLabel: 'Next', preAction: () => { if(typeof switchTab==='function') switchTab('entries'); } },
+        { img: 'imgs/taki/taki-img-1.png', text: "First, let's write a memory. This is your diary tab!", action: 'next', btnLabel: 'Next', target: '#tab-diary', preAction: () => { if(typeof switchTab==='function') switchTab('entries'); } },
         { img: 'imgs/mitsuha/mitsuha-img-3.png', text: "Don't forget to tell me how your day was by picking a weather mood! ☀️", action: 'next', btnLabel: 'Next', target: '.diary-mood-section' },
-        { img: 'imgs/taki/taki-img-3.png', text: "You can also attach photos to your memories. Tap the image icon if you want.", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "Perfect! Now let's go to the Music tab so we can share a song together!", action: 'next', btnLabel: 'Next', preAction: () => { if(typeof switchTab==='function') switchTab('music'); } },
-        { img: 'imgs/taki/taki-img-5.png', text: "Check out the Trending Now charts. These update constantly!", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Let's open the full player!", action: 'next', btnLabel: 'Next', preAction: () => { document.getElementById('full-player').classList.add('active'); document.getElementById('mini-player').classList.add('hidden'); } },
-        { img: 'imgs/taki/taki-img-3.png', text: "You can toggle between Song and Video mode using the pill at the top! 🎵", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "If we both open the app, we can listen together in Spectator Mode!", action: 'next', btnLabel: 'Next' },
-        { img: 'imgs/taki/taki-img-1.png', text: "Tap the Chat tab to send me real-time messages. 💬", action: 'next', btnLabel: 'Next', preAction: () => { document.getElementById('full-player').classList.remove('active'); document.getElementById('mini-player').classList.remove('hidden'); if(typeof switchTab==='function') switchTab('chat'); } },
+        { img: 'imgs/taki/taki-img-3.png', text: "You can also attach photos to your memories. Tap the image icon if you want.", action: 'next', btnLabel: 'Next', target: '.diary-img-btn' },
+        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "Perfect! Now let's go to the Music tab so we can share a song together!", action: 'next', btnLabel: 'Next', target: '#tab-music', preAction: () => { if(typeof switchTab==='function') switchTab('music'); } },
+        { img: 'imgs/taki/taki-img-5.png', text: "Check out the Trending Now charts. These update constantly!", action: 'next', btnLabel: 'Next', target: '.charts-container' },
+        { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Let's open the full player!", action: 'next', btnLabel: 'Next', target: '#mini-player', preAction: () => { document.getElementById('full-player').classList.add('active'); document.getElementById('mini-player').classList.add('hidden'); } },
+        { img: 'imgs/taki/taki-img-3.png', text: "You can toggle between Song and Video mode using the pill at the top! 🎵", action: 'next', btnLabel: 'Next', target: '#player-view-toggle' },
+        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "If we both open the app, we can listen together in Spectator Mode!", action: 'next', btnLabel: 'Next', target: '#btn-spectator' },
+        { img: 'imgs/taki/taki-img-1.png', text: "Tap the Chat tab to send me real-time messages. 💬", action: 'next', btnLabel: 'Next', target: '#tab-chat', preAction: () => { document.getElementById('full-player').classList.remove('active'); document.getElementById('mini-player').classList.remove('hidden'); if(typeof switchTab==='function') switchTab('chat'); } },
         { img: 'imgs/mitsuha/mitsuha-img-11.png', text: "That's it! Remember, we swap bodies every day at midnight. Have fun! ✨ 💕", action: 'finish', btnLabel: 'Finish' }
     ];
 
@@ -3142,15 +3142,6 @@ const firebaseConfig = {
                 };
             }
 
-            // Add skip button for non-finish steps
-            if (step.action === 'next') {
-                var skipBtn = document.createElement('button');
-                skipBtn.className = 'tut-wt-skip';
-                skipBtn.textContent = 'Skip';
-                skipBtn.onclick = function() { closeTutorial(); };
-                btnEl.parentNode.insertBefore(skipBtn, btnEl.nextSibling);
-            }
-
             // Block clicks outside the tutorial bubble area
             _tutWtBlockHandler = function(e) {
                 if (!e.target.closest('.tut-wt-avatar-wrap')) {
@@ -3159,50 +3150,47 @@ const firebaseConfig = {
                 }
             };
             document.addEventListener('click', _tutWtBlockHandler, true);
+        }
 
-        } else if (step.action === 'click') {
-            // Hide the Next button
-            btnEl.classList.add('hidden');
+        // --- DYNAMIC POSITIONING & SPOTLIGHT LOGIC ---
+        var wrapEl = document.getElementById('tut-wt-avatar-wrap');
+        wrapEl.classList.remove('tut-wt-pos-left', 'tut-wt-pos-right');
+        wrapEl.style.top = ''; wrapEl.style.bottom = ''; wrapEl.style.left = ''; wrapEl.style.right = '';
 
-            // Add skip button
-            var skipBtn2 = document.createElement('button');
-            skipBtn2.className = 'tut-wt-skip';
-            skipBtn2.textContent = 'Skip';
-            skipBtn2.onclick = function(e) {
-                e.stopPropagation();
-                closeTutorial();
-            };
-            btnEl.parentNode.appendChild(skipBtn2);
+        var targetEl = step.target ? document.querySelector(step.target) : null;
+        if (targetEl) {
+            targetEl.classList.add('tut-wt-spotlight');
+            _tutWtPrevSpotlight = targetEl;
+            _tutWtElevateAncestors(targetEl);
 
-            // Spotlight the target element
-            var targetEl = document.querySelector(step.target);
-            if (targetEl) {
-                targetEl.classList.add('tut-wt-spotlight');
-                _tutWtPrevSpotlight = targetEl;
-                // Elevate all ancestors that create stacking contexts
-                _tutWtElevateAncestors(targetEl);
+            var rect = targetEl.getBoundingClientRect();
+            var screenW = window.innerWidth;
+            var screenH = window.innerHeight;
+
+            // Horizontal positioning: Opposite side of target
+            if (rect.left + (rect.width/2) > screenW / 2) {
+                wrapEl.classList.add('tut-wt-pos-left');
+                wrapEl.style.left = '20px';
+                wrapEl.style.right = 'auto';
+            } else {
+                wrapEl.classList.add('tut-wt-pos-right');
+                wrapEl.style.right = '20px';
+                wrapEl.style.left = 'auto';
             }
 
-            // Listen for click on the actual target (or listenTarget)
-            var listenSelector = step.listenTarget || step.target;
-            _tutWtClickHandler = function(e) {
-                // Always allow tutorial UI clicks
-                if (e.target.closest('.tut-wt-avatar-wrap')) return;
-
-                var clicked = e.target.closest(listenSelector);
-                if (clicked) {
-                    // Allow the click to propagate to the original handler
-                    setTimeout(function() {
-                        tutWtIndex++;
-                        _renderTutWtStep();
-                    }, 400);
-                } else {
-                    // Block clicks on anything else
-                    e.stopPropagation();
-                    e.preventDefault();
-                }
-            };
-            document.addEventListener('click', _tutWtClickHandler, true);
+            // Vertical positioning: Opposite side of target
+            if (rect.top + (rect.height/2) > screenH / 2) {
+                wrapEl.style.top = '40px';
+                wrapEl.style.bottom = 'auto';
+            } else {
+                wrapEl.style.bottom = (window.innerWidth <= 480 ? '20px' : '60px');
+                wrapEl.style.top = 'auto';
+            }
+        } else {
+            // Default position
+            wrapEl.classList.add('tut-wt-pos-right');
+            wrapEl.style.bottom = (window.innerWidth <= 480 ? '20px' : '60px');
+            wrapEl.style.right = (window.innerWidth <= 480 ? '10px' : '20px');
         }
     }
 
