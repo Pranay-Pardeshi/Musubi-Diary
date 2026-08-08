@@ -555,13 +555,16 @@ const firebaseConfig = {
                         playIntroSequence(currentUser.role);
                         sessionStorage.removeItem('justSignedUp');
                         // Tutorial will be triggered after intro ends
-                    } else if (!localStorage.getItem('tutorialDone')) {
+                    } else if (!localStorage.getItem('mainTutorialDone')) {
                         // Returning user who hasn't completed tutorial yet
-                        setTimeout(showTutorial, 1500);
+                        setTimeout(() => showTutorial('main'), 1500);
                     }
                 } else {
                     l.style.display = 'none'; a.style.display = 'flex';
-                document.getElementById('app-container').classList.add('auth-visible');
+                    document.getElementById('app-container').classList.add('auth-visible');
+                    if (!localStorage.getItem('authTutorialDone')) {
+                        setTimeout(() => showTutorial('auth'), 1000);
+                    }
                 }
             }, err => {
                 console.error("Profile Sync Error:", err);
@@ -571,6 +574,9 @@ const firebaseConfig = {
         } else { 
             l.style.display = 'none'; a.style.display = 'flex'; a.style.opacity = '1';
             document.getElementById('app-container').classList.add('auth-visible');
+            if (!localStorage.getItem('authTutorialDone')) {
+                setTimeout(() => showTutorial('auth'), 1000);
+            }
         }
     });
 
@@ -2978,47 +2984,37 @@ const firebaseConfig = {
     }
 
     // ===== INTERACTIVE TUTORIAL WALKTHROUGH ENGINE =====
-    const tutWtSteps = [
-        {
-            img: 'img/img5.png', // Happy
-            text: "Welcome to Musubi Diary! I'm Mitsuha. Let me show you how to connect our timelines! ✨",
-            action: 'next',
-            btnLabel: 'Next'
-        },
-        {
-            img: 'img/img1.png', // Sparkle eyes
-            text: "First, let's write a memory. Tap the Pen icon down here! ✍️",
-            action: 'click',
-            target: '#tab-diary'
-        },
-        {
-            img: 'img/img3.png', // Confused
-            text: "This is your diary! Don't forget to tell me how your day was by picking a weather mood. ☁️",
-            action: 'click',
-            target: '.diary-mood-section',
-            listenTarget: '.mood-opt'
-        },
-        {
-            img: 'img/img1.png', // Sparkle eyes
-            text: "Perfect! Now tap the Music tab so we can share a song together! 🎵",
-            action: 'click',
-            target: '#tab-music'
-        },
-        {
-            img: 'img/img5.png', // Happy
-            text: "You did it! Remember, we swap bodies every day at midnight. Have fun! 結び 💫",
-            action: 'finish',
-            btnLabel: 'Finish'
-        }
+    const authTutSteps = [
+        { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Welcome to Musubi Diary! I'm Mitsuha. Are you ready to connect our timelines? Let's start by logging in!", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/taki/taki-img-2.png', text: "I'm Taki! If you don't have an account yet, just type your email and password, then click Sign Up.", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/mitsuha/mitsuha-img-3.png', text: "After you sign in, you'll get an Invite Code. Share it with your partner to pair your accounts! ✨", action: 'finish', btnLabel: 'Got it!' }
     ];
 
+    const mainTutSteps = [
+        { img: 'imgs/mitsuha/mitsuha-img-5.png', text: "Yay, you're in! Let me show you around our diary.", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/taki/taki-img-1.png', text: "First, let's write a memory. Tap the Pen icon down here to open the composer.", action: 'click', target: '#tab-diary' },
+        { img: 'imgs/mitsuha/mitsuha-img-6.png', text: "Don't forget to tell me how your day was by picking a weather mood! ☀️", action: 'click', target: '.diary-mood-section', listenTarget: '.mood-opt' },
+        { img: 'imgs/taki/taki-img-4.png', text: "You can also attach photos to your memories. Tap the image icon if you want.", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/mitsuha/mitsuha-img-1.png', text: "Perfect! Now tap the Music tab so we can share a song together!", action: 'click', target: '#tab-music' },
+        { img: 'imgs/taki/taki-img-5.png', text: "Check out the Trending Now charts. These update constantly!", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/mitsuha/mitsuha-img-2.png', text: "Click on the mini player at the bottom to open the full music player.", action: 'click', target: '#mini-player' },
+        { img: 'imgs/taki/taki-img-6.png', text: "You can toggle between Song and Video mode using the pill at the top! 🎵", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/mitsuha/mitsuha-img-8.png', text: "If we both open the app, we can listen together in Spectator Mode!", action: 'next', btnLabel: 'Next' },
+        { img: 'imgs/taki/taki-img-8.png', text: "Tap the Chat tab to send me real-time messages. 💬", action: 'click', target: '#tab-chat' },
+        { img: 'imgs/mitsuha/mitsuha-img-11.png', text: "That's it! Remember, we swap bodies every day at midnight. Have fun! ✨ 💕", action: 'finish', btnLabel: 'Finish' }
+    ];
+
+    let currentTutSteps = [];
+    let currentTutType = 'main';
     let tutWtIndex = 0;
     let _tutWtClickHandler = null;
     let _tutWtBlockHandler = null;
     let _tutWtPrevSpotlight = null;
     let _tutWtElevated = [];
 
-    function showTutorial() {
+    function showTutorial(type = 'main') {
+        currentTutType = type;
+        currentTutSteps = type === 'auth' ? authTutSteps : mainTutSteps;
         tutWtIndex = 0;
         document.getElementById('tut-wt-overlay').classList.add('active');
         document.getElementById('tut-wt-avatar-wrap').classList.add('active');
@@ -3030,7 +3026,11 @@ const firebaseConfig = {
         _tutWtRemoveClickListener();
         document.getElementById('tut-wt-overlay').classList.remove('active');
         document.getElementById('tut-wt-avatar-wrap').classList.remove('active');
-        localStorage.setItem('tutorialDone', 'true');
+        if (currentTutType === 'auth') {
+            localStorage.setItem('authTutorialDone', 'true');
+        } else {
+            localStorage.setItem('mainTutorialDone', 'true');
+        }
     }
 
     function _tutWtClearSpotlight() {
@@ -3094,7 +3094,7 @@ const firebaseConfig = {
     }
 
     function _renderTutWtStep() {
-        var step = tutWtSteps[tutWtIndex];
+        var step = currentTutSteps[tutWtIndex];
         if (!step) return;
 
         var avatarImg = document.getElementById('tut-wt-avatar');
